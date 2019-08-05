@@ -1,0 +1,693 @@
+<div class="ds-align-text-center">
+
+<div class="ds-grid ds-align-text-left ds-padding-left-xs-0-5 ds-padding-left-sm-2">
+	<div class="gsi-flex gsi-flex--wrap">
+		<div class="ds-col-6">
+			<div class="ds-row">
+				<div class="ds-col-auto ds-margin-top-0_5 gsi-blue-hover" title="{{ fields.map.sellerName.description }}">
+					<a class="ds-heading-3" href="{{ createBluePagesLink(eeDetail.sellerCnum) }}" target="_blank">{{ eeDetail.sellerName }}</a>
+				</div>
+				<div class="ds-col-auto gsi-align-bottom ds-margin-left-xs-0 ds-margin-left-sm-2 ds-margin-top-xs-0_5 ds-margin-top-md-0  ds-badge" ng-class="decideIplValidationColor(eeDetail.dplmtStatus)" title="{{ fields.map.dplmtStatus.description }}">
+					<span>{{ eeDetail.dplmtStatus }}</span>
+				</div>
+			</div>
+			
+			<div class="ds-row">
+				<div class="ds-col-auto gsi-blue-hover ds-padding-right-1" title="{{ fields.map.eeSerialNo.description }}">
+					<span class="ds-label ds-text-smaller ds-margin-0">{{ fields.map.eeSerialNo.name }}: </span>
+					<span class="ds-text-small">{{ eeDetail.eeSerialNo }}</span>
+				</div>
+				<div class="ds-col-auto gsi-blue-hover ds-padding-right-1" title="{{ fields.map.sellerNotesId.description }}">
+					<span class="ds-label ds-text-smaller ds-margin-0">{{ fields.map.sellerNotesId.name }}: </span>
+					<span class="ds-text-small">{{ eeDetail.sellerNotesId }}</span>
+				</div>
+			</div>
+			
+			<div class="ds-row">
+				<div class="ds-col-auto gsi-blue-hover ds-padding-right-1" title="{{ fields.map.lastUpdtNamedescription }}">
+					<span class="ds-label ds-text-smaller ds-margin-0">Updated by: </span>
+					<span ng-show="eeDetail.lastUpdtUid == '010101010'" class="ds-text-small">{{ eeDetail.lastUpdtName }}</span>
+					<a ng-hide="eeDetail.lastUpdtUid == '010101010'" class="ds-text-small" href="{{ createBluePagesLink(eeDetail.lastUpdtUid) }}" target="_blank">{{ eeDetail.lastUpdtName }}</a>
+				</div>
+				<div class="ds-col-auto gsi-blue-hover ds-padding-right-1" title="{{ fields.map.lastUpdtTime.description }}">
+					<span class="ds-label ds-text-smaller ds-margin-0">On: </span>
+					<span class="ds-text-small">{{ eeDetail.lastUpdtTime | date: 'yyyy-MM-dd - h:mm a' }}</span>
+				</div>
+			</div>
+			
+		</div>
+		<div class="ds-col-6 gsi-flex--column-reverse gsi-flex--self-center">
+			<div class="ds-align-text-xs-left ds-align-text-md-right">
+				<button type="button" ng-click="updateWWHQ(editedDetail.wwhq)"
+					ng-if="updatingDetail && editedDetail.cty == '897' || editedDetail.cty == '649' && editedDetail.wwhq != 'S' && user.wwAssigner" 
+					class="ds-col-xs-12 ds-col-md-4 ds-margin-top-xs-0_5 ds-margin-top-md-0 gsi-align-sub ibm-btn-pri ibm-btn-small ibm-btn-orange-50 gsi-animate-unset">Transfer {{ editedDetail.wwhq == 'N' ? 'to' : 'from' }} WWHQ</button>
+				<button type="button" ng-click="updateEligibility(editedDetail.ineligible)" ng-class="editedDetail.ineligible == 'N' ? 'ibm-btn-red-50' : 'ibm-btn-blue-50'"
+					ng-if="updatingDetail && (editedDetail.dplmtStatus == 'No Offered IPL' || editedDetail.dplmtStatus == 'Created' || editedDetail.dplmtStatus == 'Ineligible') && editedDetail.ineligible != 'S'" 
+					class="ds-col-xs-12 ds-col-md-4 ds-margin-top-xs-0_5 ds-margin-top-md-0 gsi-align-sub ibm-btn-pri ibm-btn-small gsi-animate-unset">Mark as {{ editedDetail.ineligible == 'N' ? 'Ineligible' : 'Eligible' }}</button>
+				<button type="button" ng-if="!updatingDetail" ng-click="newUpdate(eeDetail)"
+					class="ds-col-xs-12 ds-col-md-3 ds-margin-top-xs-0_5 ds-margin-top-lg-0 gsi-align-sub ibm-btn-pri ibm-btn-small ibm-btn-teal-50 gsi-animate-unset">Edit</button>
+				<button type="button" ng-if="updatingDetail" ng-click="updateRecord()"
+					class="ds-col-xs-12 ds-col-md-3 ds-margin-top-xs-0_5 ds-margin-top-md-0 gsi-align-sub ibm-btn-pri ibm-btn-small ibm-btn-teal-50 gsi-animate-unset">Save &amp; Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div ng-if="editedDetail" ng-show="savingUpdate" class="ds-col-xs-12 ds-alert ds-info ds-padding-top-0_5 ds-padding-bottom-0_5 ds-margin-0 gsi-animate-normal">
+    <div class="ds-loader-container">
+		<div class="ds-loader-header ds-label">Saving Updates</div>
+		<div class="ds-loader"></div>
+	</div>
+</div>
+	
+<div class="ds-grid ds-padding-top-1">
+	<div class="ds-row ds-col-auto">
+		<span class="ds-heading-4 ds-margin-0">Deployment Issue</span>
+	</div>
+</div>
+
+<div class="ds-col-12 ds-hr gsi-hr-width"></div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4 ds-input-container">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.buName.description }}">
+				<div class="ds-label ds-margin-0">BU Focal</div>
+				<input ng-show="updatingDetail" class="ds-input gsi-faces-bu" id="bu" type="text" ng-model="selected.bu"
+					ng-class="{ 'ds-error' : selected.bu != editedDetail.buName }" >
+				<a ng-show="updatingDetail && editedDetail.buName" href="{{ createBluePagesLink(editedDetail.buCnum) }}" target="_blank">Selected: {{ editedDetail.buName }} ( #{{ editedDetail.buCnum }} )</a>
+				<a ng-show="!updatingDetail" class="ds-text-small" href="{{ createBluePagesLink(eeDetail.buCnum) }}" target="_blank">{{ eeDetail.buName }}</a>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.iaName.description }}">
+				<div class="ds-label ds-margin-0">Incentive Analyst</div>
+				<input ng-show="updatingDetail" class="ds-input gsi-faces-ia" id="ia" type="text" ng-model="selected.ia"
+					ng-class="{ 'ds-error' : selected.ia != editedDetail.iaName }" >
+				<a ng-show="updatingDetail && editedDetail.iaName" href="{{ createBluePagesLink(editedDetail.iaCnum) }}" target="_blank">Selected: {{ editedDetail.iaName }} ( #{{ editedDetail.iaCnum }} )</a>
+				<a ng-show="!updatingDetail" class="ds-text-small" href="{{ createBluePagesLink(eeDetail.iaCnum) }}" target="_blank">{{ eeDetail.iaName }}</a>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.scqName.description }}">
+				<div class="ds-label ds-margin-0">SC&amp;Q Contact</div>
+				<input ng-show="updatingDetail" class="ds-input gsi-faces-scq" id="scq" type="text" ng-model="selected.scq"
+					ng-class="{ 'ds-error' : selected.scq != editedDetail.scqName }" >
+				<a ng-show="updatingDetail && editedDetail.scqName" href="{{ createBluePagesLink(editedDetail.scqCnum) }}" target="_blank">Selected: {{ editedDetail.scqName }} ( #{{ editedDetail.scqCnum }} )</a>
+				<a ng-show="!updatingDetail" class="ds-text-small" href="{{ createBluePagesLink(eeDetail.scqCnum) }}" target="_blank">{{ eeDetail.scqName }}</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4 ds-input-container">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.issueOrg.description }}">
+				<div class="ds-label ds-margin-0">Issue Org</div>
+				<select ng-show="updatingDetail" class="ds-input ds-select" ng-model="editedDetail.issueOrg" 
+					ng-options="opt.txt as opt.txt for opt in options.issueOrg">
+				</select>
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ eeDetail.issueOrg }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.ioName.description }}">
+				<div class="ds-label ds-margin-0">Issue Owner</div>
+				<input ng-show="updatingDetail" class="ds-input gsi-faces-io" id="io" type="text" ng-model="selected.io"
+					ng-class="{ 'ds-error' : selected.io != editedDetail.ioName }" >
+				<a ng-show="updatingDetail && editedDetail.ioName" href="{{ createBluePagesLink(editedDetail.ioCnum) }}" target="_blank">Selected: {{ editedDetail.ioName }} ( #{{ editedDetail.ioCnum }} )</a>
+				<a ng-show="!updatingDetail" class="ds-text-small" href="{{ createBluePagesLink(eeDetail.ioCnum) }}" target="_blank">{{ eeDetail.ioName }}</a>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.issueLvl.description }}">
+				<div class="ds-label ds-margin-0">Issue Level</div>
+				<select ng-show="updatingDetail" class="ds-input ds-select" ng-model="editedDetail.issueLvl" 
+					ng-options="opt.txt as opt.txt for opt in options.issueLvl">
+				</select>
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ eeDetail.issueLvl }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4 ds-input-container">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.expOrg.description }}">
+				<div class="ds-label ds-margin-0">Expected Org</div>
+				<select ng-show="updatingDetail" class="ds-input ds-select" ng-model="editedDetail.expOrgCd" ng-change="updateOrg(editedDetail.expOrgCd)"
+					ng-options="opt.cd as opt.cd + ' - ' + opt.txt for opt in options.expOrg">
+				</select>
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ eeDetail.expOrgCd }} <span ng-show="eeDetail.expOrgCd">-</span> {{ eeDetail.expOrgName }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.expFlmName.description }}">
+				<div class="ds-label ds-margin-0">Expected FLM</div>
+				<input ng-show="updatingDetail" class="ds-input gsi-faces-expFlm" id="expFlm" type="text" ng-model="selected.expFlm"
+					ng-class="{ 'ds-error' : selected.expFlm != editedDetail.expFlmName }" >
+				<a ng-show="updatingDetail && editedDetail.expFlmName" href="{{ createBluePagesLink(editedDetail.expFlmCnum) }}" target="_blank">Selected: {{ editedDetail.expFlmName }} ( #{{ editedDetail.expFlmCnum }} )</a>
+				<a ng-show="!updatingDetail" class="ds-text-small" href="{{ createBluePagesLink(eeDetail.expFlmCnum) }}" target="_blank">{{ eeDetail.expFlmName }}</a>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.expLevType.description }}">
+				<div class="ds-label ds-margin-0">Expected Leverage Type</div>
+				<select ng-show="updatingDetail" class="ds-input ds-select" ng-model="editedDetail.expLevType" 
+					ng-options="opt.txt as opt.txt for opt in options.expLevType" ng-change="clearLevTag()">
+				</select>
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ eeDetail.expLevType }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div ng-show="editedDetail.expLevType || eeDetail.expLevType" class="ds-col-4 ds-input-container gsi-animate-normal">
+			<div title="{{ fields.map.expLevCat.description }}">
+				<div class="ds-label ds-margin-0 gsi-blue-hover">Expected Leverage Category</div>
+		            <span ng-show="updatingDetail" ng-repeat="opt in options.expLevCat[editedDetail.expLevType]" 
+		            	class="ds-col-4 ds-padding-top-0_5" title="{{ opt.title }}">
+		            	<input class="ibm-styled-radio ds-padding-left-1" ng-model="editedDetail.expLevCat"
+		            		id="expLevCat-{{$index}}" name="expLevCat" type="radio" value="{{ opt.txt }}">
+		            	<label class="gsi-radio-label" for="expLevCat-{{$index}}">{{ opt.txt }}</label>
+		            </span>
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ eeDetail.expLevCat }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4 ds-input-container">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.rsnNtOffr.description }}">
+				<div class="ds-label ds-margin-0">Reason IPL Not Offered</div>
+				<select ng-show="updatingDetail" class="ds-input ds-select" ng-model="editedDetail.rsnNtOffr" 
+					ng-options="opt.txt as opt.txt for opt in options.rsnNtOffr">
+				</select>
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ eeDetail.rsnNtOffr }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.targetDate.description }}">
+				<div class="ds-label ds-margin-0">Target Resolution Date</div>
+				<input ng-show="updatingDetail" id="targetDate" class="ds-input gsi-cursor-pointer gsi-pick-targetDate" ng-model="targetDateFilter">
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ eeDetail.targetDate | date: 'yyyy-MM-dd' }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Action Required</div>
+				<textarea ng-show="updatingDetail" class="ds-input gsi-min-max-width" maxlength="256" ng-model="editedDetail.actnReq"></textarea>
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ eeDetail.actnReq }}</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Comments</div>
+				<textarea ng-show="updatingDetail" class="ds-input gsi-min-max-width" maxlength="256" ng-model="editedDetail.comments"></textarea>
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ eeDetail.comments }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid ds-padding-top-1">
+	<div class="ds-row ds-col-auto">
+		<div class="ds-heading-4 ds-margin-0">Seller Profile / Eligibility</div>
+	</div>
+</div>
+
+<div class="ds-col-12 ds-hr gsi-hr-width"></div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.eligDesc.description }}">
+				<div class="ds-label ds-margin-0">Eligibility</div>
+				<div class="ds-text-small ds-font-weight-bold" ng-class="decideEligColor(eeDetail.eligDesc)">{{ eeDetail.eligDesc }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.orgName.description }}">
+				<div class="ds-label ds-margin-0">{{ fields.map.orgName.name }}</div>
+				<div class="ds-text-small">{{ eeDetail.orgCd }} <span ng-show="eeDetail.orgCd">-</span> {{ eeDetail.orgName }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.roleType.description }}">
+				<div class="ds-label ds-margin-0">{{ fields.map.roleType.name }}</div>
+				<div class="ds-text-small">{{ eeDetail.roleType }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.spUserName.description }}">
+				<div class="ds-label ds-margin-0">Seller Profile Created By</div>
+				<div class="ds-text-small">{{ eeDetail.spUserName }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<br>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.ctyName.description }}">
+				<div class="ds-label ds-margin-0">{{ fields.map.ctyName.name }}</div>
+				<div class="ds-text-small">{{ eeDetail.ctyName }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.roleDesc.description }}">
+				<div class="ds-label ds-margin-0">{{ fields.map.roleDesc.name }}</div>
+				<div class="ds-text-small">{{ eeDetail.roleDesc }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.spCreateTimestamp.description }}  (yyyy-mm-dd hh:mm)">
+				<div class="ds-label ds-margin-0">Seller Profile Created On</div>
+				<div class="ds-text-small">{{ eeDetail.spCreateTimestamp | date: 'yyyy-MM-dd HH:mm' }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<br>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.imt.description }}">
+				<div class="ds-label ds-margin-0">{{ fields.map.imt.name }}</div>
+				<div class="ds-text-small">{{ eeDetail.imt }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.lm1NotesId.description }}">
+				<div class="ds-label ds-margin-0">{{ fields.map.lm1NotesId.name }}</div>
+				<a class="ds-text-small" href="{{ createBluePagesLink(eeDetail.lm1Cnum) }}" target="_blank">{{ eeDetail.lm1NotesId }}</a>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.lm2NotesId.description }}">
+				<div class="ds-label ds-margin-0">{{ fields.map.lm2NotesId.name }}</div>
+				<a class="ds-text-small" href="{{ createBluePagesLink(eeDetail.lm2Cnum) }}" target="_blank">{{ eeDetail.lm2NotesId }}</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<br>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.iot.description }}">
+				<div class="ds-label ds-margin-0">{{ fields.map.iot.name }}</div>
+				<div class="ds-text-small">{{ eeDetail.iot }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.lm1Cnum.description }}">
+				<div class="ds-label ds-margin-0">{{ fields.map.lm1Cnum.name }}</div>
+				<a class="ds-text-small" href="{{ createBluePagesLink(eeDetail.lm1Cnum) }}" target="_blank">{{ eeDetail.lm1Cnum }}</a>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.lm2Cnum.description }}">
+				<div class="ds-label ds-margin-0">{{ fields.map.lm2Cnum.name }}</div>
+				<a class="ds-text-small" href="{{ createBluePagesLink(eeDetail.lm2Cnum) }}" target="_blank">{{ eeDetail.lm2Cnum }}</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<br>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="Divison / Departament Bluepages API">
+				<div class="ds-label ds-margin-0">Div / Dept</div>
+				<div class="ds-text-small">{{ bpDetail.div }} / {{ bpDetail.dept }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="HR Org from Bluepages API">
+				<div class="ds-label ds-margin-0">HR Org</div>
+				<div class="ds-text-small">{{ bpDetail.hrorganizationcode }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="Job Responsabilities from Bluepages API">
+				<div class="ds-label ds-margin-0">Job Resp</div>
+				<div class="ds-text-small">{{ bpDetail.jobresponsibilities }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<br>
+
+<div class="ds-grid" ng-if="eeDetail.refOrgCd">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.refOrgCd.description }}">
+				<div class="ds-label ds-margin-0">{{ fields.map.refOrgCd.name }}</div>
+				<div class="ds-text-small">{{ eeDetail.refOrgCd }} <span ng-show="eeDetail.refOrgCd">-</span> {{ eeDetail.refOrgName }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.refOrgRollUp1.description }}">
+				<div class="ds-label ds-margin-0">{{ fields.map.refOrgRollUp1.name }}</div>
+				<div class="ds-text-small">{{ eeDetail.refOrgRollUp1 }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.refOrgRollUp2.description }}">
+				<div class="ds-label ds-margin-0">{{ fields.map.refOrgRollUp2.name }}</div>
+				<div class="ds-text-small">{{ eeDetail.refOrgRollUp2 }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid ds-padding-top-1">
+	<div class="ds-row ds-col-auto">
+		<div class="ds-heading-4 ds-margin-0">FMS Incentive Plan Letter Information</div>
+	</div>
+</div>
+
+<div class="ds-col-12 ds-hr gsi-hr-width"></div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="ds-label ds-margin-0">&nbsp;</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Previous Cycle</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Current Cycle</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Plan Type</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.pcPlanType.description }}">
+				<div class="ds-text-small">{{ eeDetail.pcPlanType }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.ccPlanType.description }}">
+				<div class="ds-text-small">{{ eeDetail.ccPlanType }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">PDT Name</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.pcPdtName.description }}">
+				<div class="ds-text-small">{{ eeDetail.pcPdtName }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.ccPdtName.description }}">
+				<div class="ds-text-small">{{ eeDetail.ccPdtName }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid ds-bg-contextual-neutral-2">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">First Line Manager</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.pcMgrNotesId.description }}">
+				<a class="ds-text-small" href="{{ createBluePagesLink(eeDetail.pcMgrSerialNo + eeDetail.pcMgrCty) }}" target="_blank">{{ eeDetail.pcMgrNotesId }}</a>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.ccMgrNotesId.description }}">
+				<a class="ds-text-small" href="{{ createBluePagesLink(eeDetail.ccMgrSerialNo + eeDetail.ccMgrCty) }}" target="_blank">{{ eeDetail.ccMgrNotesId }}</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Second Line Manager</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.pcSlMgrNotesId.description }}">
+				<a class="ds-text-small" href="{{ createBluePagesLink(eeDetail.pcSlMgrSerialNo + eeDetail.pcSlMgrCty) }}" target="_blank">{{ eeDetail.pcSlMgrNotesId }}</a>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.ccSlMgrNotesId.description }}">
+				<a class="ds-text-small" href="{{ createBluePagesLink(eeDetail.ccSlMgrSerialNo + eeDetail.ccSlMgrCty) }}" target="_blank">{{ eeDetail.ccSlMgrNotesId }}</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Start / End Months</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" >
+				<div class="ds-text-small">
+					<span title="{{ fields.map.pcDateStrt.description }}">{{ eeDetail.pcDateStrt | date: 'MM' }}</span> 
+						<span ng-if="eeDetail.pcDateStrt">/</span>
+						<span title="{{ fields.map.pcDateEnd.description }}">{{ eeDetail.pcDateEnd | date: 'MM' }}</span>
+				</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-text-small" ng-class="decideOffPlanColor(eeDetail.ccDateEnd)">
+					<span title="{{ fields.map.ccDateStrt.description }}">{{ eeDetail.ccDateStrt | date: 'MM' }}</span>
+						<span ng-if="eeDetail.ccDateStrt">/</span> 
+						<span title="{{ fields.map.ccDateEnd.description }}">{{ eeDetail.ccDateEnd | date: 'MM' }}</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Plan Length / Plan Cycle</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.pcPlanLengthMths.description }}">
+				<span title="{{ fields.map.pcPlanLengthMths.description }}">{{ eeDetail.pcPlanLengthMths }}</span> 
+					<span ng-if="eeDetail.pcPlanLengthMths">/</span>
+					<span title="{{ fields.map.pcPlanCycle.description }}">{{ eeDetail.pcPlanCycle }}</span>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.ccPlanLengthMths.description }}">
+				<span title="{{ fields.map.ccPlanLengthMths.description }}">{{ eeDetail.ccPlanLengthMths }}</span> 
+					<span ng-if="eeDetail.ccPlanLengthMths">/</span>
+					<span title="{{ fields.map.ccPlanCycle.description }}">{{ eeDetail.ccPlanCycle }}</span>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Incentive Plan Letter Status</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.pcIplApprStatus.description }}">
+				<div class="ds-text-small ds-font-weight-bold" ng-class="decideIplStatusColor(eeDetail.pcIplApprStatus)">{{ eeDetail.pcIplApprStatus }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.ccIplApprStatus.description }}">
+				<div class="ds-text-small ds-font-weight-bold" ng-class="decideIplStatusColor(eeDetail.ccIplApprStatus)">{{ eeDetail.ccIplApprStatus }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Plan Offered Time</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.pcOfferedTime.description }} (yyyy/mm/dd)">
+				<div class="ds-text-small">{{ eeDetail.pcOfferedTime | date: 'yyyy/MM/dd' }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.ccOfferedTime.description }} (yyyy/mm/dd)">
+				<div class="ds-text-small">{{ eeDetail.ccOfferedTime | date: 'yyyy/MM/dd' }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Plan Accepted Time</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.pcEeAcceptTime.description }} (yyyy/mm/dd)">
+				<div class="ds-text-small">{{ eeDetail.pcEeAcceptTime | date: 'yyyy/MM/dd' }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.ccEeAcceptTime.description }} (yyyy/mm/dd)">
+				<div class="ds-text-small">{{ eeDetail.ccEeAcceptTime | date: 'yyyy/MM/dd' }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Org Name</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.refOrgName.description }}">
+				<div class="ds-text-small">{{ eeDetail.refOrgName }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.orgName.description }}">
+				<div class="ds-text-small">{{ eeDetail.orgName }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Role Type</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.refRoleType.description }}">
+				<div class="ds-text-small">{{ eeDetail.refRoleType }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.roleType.description }}">
+				<div class="ds-text-small">{{ eeDetail.roleType }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Role Description</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.refRoleDesc.description }}">
+				<div class="ds-text-small">{{ eeDetail.refRoleDesc }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.roleDesc.description }}">
+				<div class="ds-text-small">{{ eeDetail.roleDesc }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Leverage Description</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.refLeverageDesc.description }}">
+				<div class="ds-text-small">{{ eeDetail.refLeverageDesc }}</div>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.leverageDesc.description }}">
+				<div class="ds-text-small">{{ eeDetail.leverageDesc }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<br>
+<br>
+
+</div>

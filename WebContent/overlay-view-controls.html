@@ -1,0 +1,29 @@
+<div class="ds-grid ds-align-text-center ds-text-smaller">
+	
+	<p class="ds-font-weight-normal ds-heading-2 ds-padding-bottom-2">Save View</p>
+    
+   
+ 	<div class="ds-col-12 ds-input-container">
+		<div class="ds-col-xs-12 ds-col-md-10 ds-col-lg-7 gsi-blue-hover ds-text-smaller ds-padding-bottom-0_5" title="Select in which Index to save this View">
+			<div class="ds-label ds-margin-0">View Index</div>
+			<select class="ds-input ds-select" ng-model="selectedView.view" 
+				ng-options="view as view.idx for view in savedViews">
+			</select>
+		</div>
+	</div>
+	
+ 	<div class="ds-col-12 ds-input-container">
+		<div class="ds-col-xs-12 ds-col-md-10 ds-col-lg-7 gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="Insert or Modify the name with which to save this View">
+			<div class="ds-label ds-margin-0">View Name</div>
+			<input class="ds-input" id="viewName" type="text" ng-model="selectedView.view.name">
+		</div>
+	</div>
+    
+    <div class="ds-row ds-margin-bottom-2 ds-margin-top-1">
+	<button type="button" ng-click="saveViewOnDb(selectedView.view.idx, selectedView.view.name)"
+		class="ds-col-xs-12 ds-col-md-5 ds-col-lg-4 gsi-align-sub ibm-btn-pri ibm-btn-blue-50">Save this View</button>
+		
+	<button type="button" ng-click="saveViewOnDb(selectedView.view.idx, selectedView.view.name)"
+		class="ds-col-xs-12 ds-col-md-5 ds-col-lg-4 ds-margin-left-md-1 ds-margin-top-xs-1 ds-margin-top-md-0 gsi-align-sub ibm-btn-pri ibm-btn-red-50">Cancel</button>
+    </div>
+</div>   

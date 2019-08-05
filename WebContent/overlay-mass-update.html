@@ -1,0 +1,165 @@
+<div class="ds-align-text-center">
+
+<div class="ds-grid ds-align-text-left ds-padding-left-xs-0-5 ds-padding-left-sm-2">
+	<div class="gsi-flex gsi-flex--wrap">
+		<div class="ds-col-8">
+			<div class="ds-row">
+				<div class="ds-col-auto ds-margin-top-0_5 ds-margin-bottom-0 ds-heading-3 gsi-blue-hover">Mass Update</div>
+			</div>
+			
+			<div class="ds-row">
+				<div class="ds-col-auto gsi-blue-hover ds-padding-right-1">
+					<span class="ds-text-small">Use this function to update several records at the same time.</span>
+				</div>
+			</div>
+			
+		</div>
+		<div class="ds-col-4 gsi-flex--column-reverse gsi-flex--self-center">
+			<div class="ds-align-text-xs-left ds-align-text-md-right">
+				<button type="button" ng-click="massUpdateConfirm()"
+					class="ds-col-xs-12 ds-col-md-5 ds-margin-top-xs-0_5 ds-margin-top-md-0 gsi-align-sub ibm-btn-pri ibm-btn-teal-50 gsi-animate-unset">Save &amp; Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div ng-if="editedDetail" ng-show="savingUpdate" class="ds-col-xs-12 ds-alert ds-info ds-padding-top-0_5 ds-padding-bottom-0_5 ds-margin-0 gsi-animate-normal">
+    <div class="ds-loader-container">
+		<div class="ds-loader-header ds-label">Saving Updates. Depending on your filters, this can take some minutes.</div>
+		<div class="ds-loader"></div>
+	</div>
+</div>
+
+<div class="ds-grid ds-padding-top-1">
+	<div class="ds-row ds-col-auto">
+		<span class="ds-heading-4 ds-margin-0">Mass Update</span>
+	</div>
+</div>
+
+<div class="ds-col-12 ds-hr gsi-hr-width"></div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4 ds-input-container">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.buName.description }}">
+				<div class="ds-label ds-margin-0">BU Focal</div>
+				<input class="ds-input gsi-faces-mass-bu" id="bu" type="text" ng-model="selected.bu"
+					ng-class="{ 'ds-error' : selected.bu != editedDetail.buName }" >
+				<a ng-show="editedDetail.buName" href="{{ createBluePagesLink(editedDetail.buCnum) }}" target="_blank">Selected: {{ editedDetail.buName }} ( #{{ editedDetail.buCnum }} )</a>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.iaName.description }}">
+				<div class="ds-label ds-margin-0">Incentive Analyst</div>
+				<input class="ds-input gsi-faces-mass-ia" id="ia" type="text" ng-model="selected.ia"
+					ng-class="{ 'ds-error' : selected.ia != editedDetail.iaName }" >
+				<a ng-show="editedDetail.iaName" href="{{ createBluePagesLink(editedDetail.iaCnum) }}" target="_blank">Selected: {{ editedDetail.iaName }} ( #{{ editedDetail.iaCnum }} )</a>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.scqName.description }}">
+				<div class="ds-label ds-margin-0">SC&amp;Q Contact</div>
+				<input class="ds-input gsi-faces-mass-scq" id="scq" type="text" ng-model="selected.scq"
+					ng-class="{ 'ds-error' : selected.scq != editedDetail.scqName }" >
+				<a ng-show="editedDetail.scqName" href="{{ createBluePagesLink(editedDetail.scqCnum) }}" target="_blank">Selected: {{ editedDetail.scqName }} ( #{{ editedDetail.scqCnum }} )</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4 ds-input-container">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.issueOrg.description }}">
+				<div class="ds-label ds-margin-0">Issue Org</div>
+				<select class="ds-input ds-select" ng-model="editedDetail.issueOrg" 
+					ng-options="opt.txt as opt.txt for opt in options.issueOrg">
+				</select>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.ioName.description }}">
+				<div class="ds-label ds-margin-0">Issue Owner</div>
+				<input class="ds-input gsi-faces-mass-io" id="io" type="text" ng-model="selected.io"
+					ng-class="{ 'ds-error' : selected.io != editedDetail.ioName }" >
+				<a ng-show="editedDetail.ioName" href="{{ createBluePagesLink(editedDetail.ioCnum) }}" target="_blank">Selected: {{ editedDetail.ioName }} ( #{{ editedDetail.ioCnum }} )</a>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.issueLvl.description }}">
+				<div class="ds-label ds-margin-0">Issue Level</div>
+				<select class="ds-input ds-select" ng-model="editedDetail.issueLvl" 
+					ng-options="opt.txt as opt.txt for opt in options.issueLvl">
+				</select>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4 ds-input-container">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.expOrg.description }}">
+				<div class="ds-label ds-margin-0">Expected Org</div>
+				<select class="ds-input ds-select" ng-model="editedDetail.expOrg" 
+					ng-options="opt.txt as opt.txt for opt in options.expOrg">
+				</select>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.expFlmName.description }}">
+				<div class="ds-label ds-margin-0">Expected FLM</div>
+				<input class="ds-input gsi-faces-mass-expFlm" id="expFlm" type="text" ng-model="selected.expFlm"
+					ng-class="{ 'ds-error' : selected.expFlm != editedDetail.expFlmName }" >
+				<a ng-show="editedDetail.expFlmName" href="{{ createBluePagesLink(editedDetail.expFlmCnum) }}" target="_blank">Selected: {{ editedDetail.expFlmName }} ( #{{ editedDetail.expFlmCnum }} )</a>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.expLevType.description }}">
+				<div class="ds-label ds-margin-0">Expected Leverage Type</div>
+				<select class="ds-input ds-select" ng-model="editedDetail.expLevType" 
+					ng-options="opt.txt as opt.txt for opt in options.expLevType">
+				</select>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4 ds-input-container">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.rsnNtOffr.description }}">
+				<div class="ds-label ds-margin-0">Reason IPL Not Offered</div>
+				<select class="ds-input ds-select" ng-model="editedDetail.rsnNtOffr" 
+					ng-options="opt.txt as opt.txt for opt in options.rsnNtOffr">
+				</select>
+			</div>
+		</div>
+		<div class="ds-col-4">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.targetDate.description }}">
+				<div class="ds-label ds-margin-0">Target Resolution Date</div>
+				<input id="targetDate" class="ds-input gsi-cursor-pointer gsi-pick-mass-targetDate" ng-model="targetDateFilter">
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Action Required</div>
+				<textarea class="ds-input gsi-min-max-width" maxlength="256" ng-model="editedDetail.actnReq"></textarea>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Comments</div>
+				<textarea class="ds-input gsi-min-max-width" maxlength="256" ng-model="editedDetail.comments"></textarea>
+			</div>
+		</div>
+	</div>
+</div>
+
+</div>

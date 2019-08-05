@@ -1,0 +1,16 @@
+<div class="ds-text-small">
+	<div class="ds-col-auto-force ds-padding-right-0_5 gsi-deepblue-hover">
+		<div ng-if="query.first > 0" ng-click="previousPage()" title="Click here to move to previous page">
+			<span class="ds-icon-caret-circle-left-m-l ds-icon-size-small gsi-align-sub"></span> Previous
+		</div>
+	</div>
+	<div class="ds-col-auto-force" ng-if="counts.current">
+		<strong>{{ query.first + 1 }}-{{ query.getLast() > counts.current ? counts.current : query.getLast() }}</strong> of <strong>{{ counts.current | number: 0 }}</strong>
+		<span ng-if="counts.current && counts.current > -1"> result<span ng-if="counts.current > 1">s</span></span>
+	</div>
+	<div class="ds-col-auto-force ds-padding-left-0_5 gsi-deepblue-hover">
+		<div ng-if="query.getLast() < counts.current" ng-click="nextPage()" title="Click here to move to next page">
+			Next <span class="ds-icon-caret-circle-right-m-l ds-icon-size-small gsi-align-sub"></span>
+		</div>
+	</div>
+</div>

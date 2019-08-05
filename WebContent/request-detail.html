@@ -1,0 +1,745 @@
+<div class="ds-align-text-center ds-margin-bottom-3">
+
+<div class="ds-float-right">
+	<div class="gsi-flex gsi-flex--wrap">
+		
+		<div class="ds-col-6 gsi-flex--column-reverse gsi-flex--self-center">
+			<div class="gsi-overlay-heading">
+				<button class="ds-col-auto ds-button ds-flat ds-icon-x" ng-click="overlayHide()">
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div ng-if="editedDetail" ng-show="savingUpdate" class="ds-col-xs-12 ds-alert ds-info ds-padding-top-0_5 ds-padding-bottom-0_5 ds-margin-0 gsi-animate-normal">
+    <div class="ds-loader-container">
+		<div class="ds-loader-header ds-label">Saving Updates</div>
+		<div class="ds-loader"></div>
+	</div>
+</div>
+<br><br>
+
+<div class="ds-grid ds-align-text-center ds-padding-left-xs-0-5 ds-padding-left-sm-2">
+	<div class="gsi-flex gsi-flex--wrap">
+		<div class="ds-col-12 gsi-flex--self-center">			
+			<div class="ds-float-right" style="position: absolute">
+					<button type="button" ng-if="!updatingDetail" ng-click="newUpdate(requestDetail)"
+						class="ds-col-xs-12 ds-col-md-3 ds-margin-top-xs-0_5 ds-margin-top-lg-0 gsi-align-sub ibm-btn-pri ibm-btn-small ibm-btn-teal-50 gsi-animate-unset">Edit</button>
+					<button type="button" ng-if="updatingDetail" ng-click="updateRecord()"
+						class="ds-col-xs-12 ds-col-md-3 ds-margin-top-xs-0_5 ds-margin-top-md-0 gsi-align-sub ibm-btn-pri ibm-btn-small ibm-btn-teal-50 gsi-animate-unset">Save</button>
+			</div>
+			<div>
+				<span class="ds-heading-4 ds-margin-1">Request Details</span>
+			</div>					
+		</div>
+	</div>
+</div>
+<br>
+<!--  <div class="ds-col-12 ds-hr gsi-hr-width"></div>  -->
+
+<div class="ds-panel ds-panel-rounded ds-panel-floating ds-grid ds-col-md-11 ds-col-lg-8">
+	<div class="ds-panel-container">
+		
+		<div class="ds-row">
+			<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.logNbr.description }}">
+					<div class="ds-label ds-margin-0">Log Number</div>
+<!-- 					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.logNbr"/> -->
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.logNbr }}</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="ds-row">
+			<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.submitterName.description }}">
+					<div class="ds-label ds-margin-0">Submitter Name</div>
+						<!-- <input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.submitterName"/> -->	
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.submitterName }}</div>
+				</div>
+			</div>
+			
+			<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.submitterCnum.description }}">
+					<div class="ds-label ds-margin-0">Submitter CNUM</div>
+<!-- 					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.submitterCnum"/> -->
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.submitterCnum }}</div>
+				</div>
+			</div>
+			
+			<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.approval_type.description }}">
+					<div class="ds-label ds-margin-0">Approval Category/Type</div>
+<!-- 					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.apprType"/> -->
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.apprType }}</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="ds-row">
+			<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.geo.description }}">
+					<div class="ds-label ds-margin-0">Geo</div>
+						<!-- <input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.geo"/> -->	
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.geo }}</div>
+				</div>
+			</div>
+			
+			<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.market.description }}">
+					<div class="ds-label ds-margin-0">Market</div>
+<!-- 					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.market"/> -->
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.market }}</div>
+				</div>
+			</div>
+			
+			<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.country.description }}">
+					<div class="ds-label ds-margin-0">Country Code/Country Code</div>
+<!-- 					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.country"/> -->
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.country }}</div>
+				</div>
+			</div>
+		</div>	
+				
+		<div class="ds-row">
+			<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.planYearAffected.description }}">
+					<div class="ds-label ds-margin-0">Plan Year</div>
+						<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.planYearAffected"/>	
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.planYearAffected }}</div>
+				</div>
+			</div>
+			
+			<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.durationAffected.description }}">
+					<div class="ds-label ds-margin-0">Duration</div>
+ 						<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.durationAffected"/>
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.durationAffected }}</div>
+				</div>
+			</div>
+			
+			<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.briefDescr.description }}">
+					<div class="ds-label ds-margin-0">Description</div>
+	 					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.briefDescr"/>
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.briefDescr }}</div>
+				</div>
+			</div>
+		</div>
+						
+		<div class="ds-row">
+			<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.salesRoles.description }}">
+					<div class="ds-label ds-margin-0">Sales Role(s)</div>
+						<!-- <input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.salesRoles"/> -->	
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.salesRoles }}</div>
+				</div>
+			</div>
+			
+	 		<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.salesRolesAffected.description }}">
+					<div class="ds-label ds-margin-0">Sales Role(s) Affected By Request</div>
+	 					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.salesRolesAffected"/>
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.salesRolesAffected }}</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="ds-row">
+			<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.noAffectedEmpl.description }}">
+					<div class="ds-label ds-margin-0">No. of Affected Employees</div>
+						<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.noAffectedEmpl"/>	
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.noAffectedEmpl }}</div>
+				</div>
+			</div>
+			
+	 		<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.nameAffectedEmployee.description }}">
+					<div class="ds-label ds-margin-0">Name of Affected Employees</div>
+ 						<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.nameAffectedEmployee"/>
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.nameAffectedEmployee }}</div>
+				</div>
+			</div>
+		</div>
+		
+		<div>
+				<span class="ds-heading-4 ds-margin-1">Quota Details</span>
+		</div>	
+		
+		<div class="ds-row">
+			<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.curQta.description }}">
+					<div class="ds-label ds-margin-0">Current Quota:</div>
+							<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.curQta"/>	
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.curQta }}</div>
+				</div>
+			</div>
+			
+	 		<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.newQta.description }}">
+					<div class="ds-label ds-margin-0">New Quota:</div>
+		 					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.newQta"/>
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.newQta }}</div>
+				</div>
+			</div>
+		</div>	
+		
+		<div class="ds-row">
+			<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.busnValues.description }}">
+					<div class="ds-label ds-margin-0">Business Values and Benefits:</div>
+ 						<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.busnValues"/>
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.busnValues }}</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="ds-row">
+			<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.fullAssn.description }}">
+					<div class="ds-label ds-margin-0">Will Full Assignment of Quota Be Maintained?</div>
+	 					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.fullAssn"/>
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.fullAssn }}</div>
+				</div>
+			</div>
+		</div>			
+<!-- 		<div class="ds-row">
+			<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.status.description }}">
+					<div class="ds-label ds-margin-0">Status</div>
+					<select ng-show="updatingDetail" class="ds-input ds-select" ng-model="editedDetail.status" 
+						ng-options="except.txt as except.txt for except in options.status">
+					</select>
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ activityDetail.status }}</div>
+				</div>
+			</div>
+			<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+				<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1">
+					<div class="ds-label ds-margin-0">Comments</div>
+					<textarea ng-show="updatingDetail" class="ds-input gsi-min-max-width" maxlength="256" ng-model="editedDetail.comments"></textarea>
+					<div ng-show="!updatingDetail" class="ds-text-small">{{ activityDetail.comments }}</div>
+				</div>
+			</div>
+		</div> -->
+<div class="ds-col-12 ds-hr gsi-hr-width"></div>
+
+<div class="ds-grid ds-padding-top-1">
+	<div class="ds-row ds-col-auto">
+		<div class="ds-heading-4 ds-margin-0">Payment Details</div>
+	</div>
+</div>
+
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-4">
+			<div class="ds-label ds-margin-0">&nbsp;</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Plan Start Date</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.planStart.description }}">
+				<div class="ds-text-small">{{ requestDetail.planStart | date: 'yyyy-MM-dd' }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Plan End Date</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.planEnd.description }}">
+				<div class="ds-text-small">{{ requestDetail.planEnd | date: 'yyyy-MM-dd' }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Commission Month</div>					
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.commnMth.description }}">					
+				<div class="ds-text-small">{{ requestDetail.commnMth }}</div>
+<!-- 					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.commnMth"/> -->
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Will Monetary Claim Be Submitted to Post Payroll?</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.submitPayroll.description }}">
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.submitPayroll }}</div>	
+			</div>
+		</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Actions Needed To Correct The Issue At The Root Cause:</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.correctRootcause.description }}">
+				<div class="ds-text-small">{{ requestDetail.correctRootcause }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Time Frame of Overpayments (Begin):</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.overpaymentBegin.description }}">
+				<div class="ds-text-small">{{ requestDetail.overpaymentBegin | date: 'yyyy-MM-dd' }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Time Frame of Overpayments (End):</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.overpaymentEnd.description }}">
+				<div class="ds-text-small">{{ requestDetail.overpaymentEnd | date: 'yyyy-MM-dd' }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Is A Hardcopy Check To Be Mailed To The Employee's Home Address Required?</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.emplMail.description }}">
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.emplMail }}</div>	
+			</div>
+		</div>
+	</div>
+</div>
+	
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Will Overnight Mail Handling Be Handling?</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.overnightMail.description }}">
+				<div class="ds-text-small">{{ requestDetail.overnightMail }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Payment Amount</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.pmtAmount.description }}">
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.pmtAmount }}</div>	
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Payment Currency</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.pmtCurr.description }}">
+				<div class="ds-text-small">{{ requestDetail.pmtCurr }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Sum of All Debit Balances:</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.sumDebitBalance.description }}">
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.sumDebitBalance }}</div>	
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Date Submitted To Payroll:</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.submittedPR.description }}">
+				<div class="ds-text-small">{{ requestDetail.submittedPR | date: 'yyyy-MM-dd' }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Date Confirmed By Payroll:</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.sumDebitBalance.description }}">
+				<div class="ds-text-small">{{ requestDetail.srRequest | date: 'yyyy-MM-dd' }}</div>	
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid ds-padding-top-1">
+	<div class="ds-row ds-col-auto">
+		<div class="ds-heading-4 ds-margin-0">What Is This Request?</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Payment Type</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.pmtType.description }}">
+				<div class="ds-text-small">{{ requestDetail.pmtType }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Payment Reason</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.pmtReason.description }}">
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.pmtReason }}</div>	
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Payment Category</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.pmtCategory.description }}">
+				<div class="ds-text-small">{{ requestDetail.pmtCategory }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">Root Cause</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.rootCause.description }}">
+				<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.rootCause }}</div>	
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid">
+	<div class="ds-row ds-bg-contextual-neutral-2">
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1">
+				<div class="ds-label ds-margin-0">When Was The Issue Identified?</div>
+			</div>
+		</div>
+		<div class="ds-col-6">
+			<div class="gsi-blue-hover ds-padding-bottom-1" title="{{ fields.map.issueIdentified.description }}">
+				<div class="ds-text-small">{{ requestDetail.issueIdentified | date: 'yyyy-MM-dd' }}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-col-12 ds-hr gsi-hr-width"></div>
+
+<div class="ds-grid ds-padding-top-1">
+	<div class="ds-row ds-col-auto">
+		<div class="ds-heading-4 ds-margin-0">Measurement Details</div>
+	</div>
+</div>
+
+<div class="ds-grid ds-padding-top-1 ds-padding-bottom-1">
+	<div class="ds-row ds-col-auto">
+		<div class="ds-heading-4 ds-margin-0">Data Owner And Information</div>
+	</div>
+</div>
+
+<div class="ds-row">
+	<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.compMeasReq.description }}">
+			<div class="ds-label ds-margin-0">Manual Measurement Requested</div>
+ 				<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.compMeasReq"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.compMeasReq }}</div>
+		</div>
+	</div>
+
+	<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.srcSys.description }}">
+			<div class="ds-label ds-margin-0">Source System?</div>
+	 				<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.srcSys"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.srcSys }}</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-row">
+	<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.emplMeas.description }}">
+			<div class="ds-label ds-margin-0">Employees Currently On Measurements</div>
+					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.emplMeas"/>	
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.emplMeas }}</div>
+		</div>
+	</div>
+			
+	 <div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.addtEmplMeas.description }}">
+			<div class="ds-label ds-margin-0">Add't Employees To Be Added To the Measurements</div>
+				<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.addtEmplMeas"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.addtEmplMeas }}</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-row">
+	<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.respProvResults.description }}">
+			<div class="ds-label ds-margin-0">Party Responsible For Providing The Manual Measurements Results</div>
+					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.respProvResults"/>	
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.respProvResults }}</div>
+		</div>
+	</div>
+			
+	 <div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.dataAppr.description }}">
+			<div class="ds-label ds-margin-0">Who Is The Data Approver?</div>
+				<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.dataAppr"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.dataAppr }}</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-row">
+	<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.contrChecks.description }}">
+			<div class="ds-label ds-margin-0">Controls/Checks Performed on Data</div>
+	 				<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.contrChecks"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.contrChecks }}</div>
+		</div>
+	</div>
+	
+	<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.extractCrit.description }}">
+			<div class="ds-label ds-margin-0">Extraction Criteria for Results</div>
+					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.extractCrit"/>	
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.extractCrit }}</div>
+		</div>
+	</div>
+			
+	 <div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.freqResult.description }}">
+			<div class="ds-label ds-margin-0">Frequency of Providing Results</div>
+				<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.freqResult"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.freqResult }}</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-row">
+	<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.ascaCert.description }}">
+			<div class="ds-label ds-margin-0">Data Provided From ASCA Certified System</div>
+	 				<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.ascaCert"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.ascaCert }}</div>
+		</div>
+	</div>
+
+	<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.furthChecks.description }}">
+			<div class="ds-label ds-margin-0">Incentive Team Expected To Perform Any Other Checks</div>
+	 				<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.furthChecks"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.furthChecks }}</div>
+		</div>
+	</div>
+
+	<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.wkDay.description }}">
+			<div class="ds-label ds-margin-0">Workday Data Will Be Provided</div>
+					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.wkDay"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.wkDay }}</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid ds-padding-top-1 ds-padding-bottom-1">
+	<div class="ds-row ds-col-auto">
+		<div class="ds-heading-4 ds-margin-0">Implementation Requirements- How and When?</div>
+	</div>
+</div>
+
+<div class="ds-row">
+	<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.reqChanges.description }}">
+			<div class="ds-label ds-margin-0">System Changes And/Or Manual Resources Required</div>
+					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.reqChanges"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.reqChanges }}</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-row">
+	<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.apprName.description }}">
+			<div class="ds-label ds-margin-0">Approver Resource Implementor Name/ Email</div>
+					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.apprName"/>	
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.apprName }}</div>
+		</div>
+	</div>
+			
+	 <div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.resImpl.description }}">
+			<div class="ds-label ds-margin-0">Has The Resource Implementor Agreed?</div>
+				<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.resImpl"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.resImpl }}</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-row">
+	<div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.impact.description }}">
+			<div class="ds-label ds-margin-0">Describe and Quantify the Impact</div>
+					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.impact"/>	
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.impact }}</div>
+		</div>
+	</div>
+			
+	 <div class="ds-col-6 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.dataID.description }}">
+			<div class="ds-label ds-margin-0">Is The Payment Cycle Impacted?</div>
+				<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.dataID"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.dataID }}</div>
+		</div>
+	</div>
+</div>
+
+<div class="ds-grid ds-padding-top-1 ds-padding-bottom-1">
+	<div class="ds-row ds-col-auto">
+		<div class="ds-heading-4 ds-margin-0">Design Category</div>
+	</div>
+</div>
+
+<div class="ds-row">
+	<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.trustSrc.description }}">
+			<div class="ds-label ds-margin-0">Acheivement Provided From A Trusted Source?</div>
+					<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.trustSrc"/>	
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.trustSrc }}</div>
+		</div>
+	</div>
+			
+	 <div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.provDen.description }}">
+			<div class="ds-label ds-margin-0">Has The Data Provider Been Identified/Recognized?</div>
+				<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.provDen"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.provDen }}</div>
+		</div>
+	</div>
+
+	<div class="ds-col-4 ds-input-container ds-margin-bottom-0 ds-padding-bottom-0">
+		<div class="gsi-blue-hover ds-text-smaller ds-padding-bottom-1" title="{{ fields.map.wwLocal.description }}">
+			<div class="ds-label ds-margin-0">Is The Measurement Going To Available WW or Local?</div>
+ 				<input ng-show="updatingDetail" type="text" class="ds-input" id="input-text" ng-model="editedDetail.wwLocal"/>
+			<div ng-show="!updatingDetail" class="ds-text-small">{{ requestDetail.wwLocal }}</div>
+		</div>
+	</div>
+</div>
+
+</div>
+
+</div>
+
+

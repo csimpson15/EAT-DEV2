@@ -1,0 +1,869 @@
+<div ng-controller="MainCtrl">
+
+<div class="gsi-band-bg ds-padding-1">
+	<div class="ds-col-12 ds-padding-left-2 ds-text-neutral-1">
+		<div class="ds-heading-3 ds-margin-bottom-0">Exceptions Approvals Tool</div>
+		<div class="ds-heading-5 ds-margin-bottom-0">Welcome to the Exceptions Approvals Tool. Create and view exceptions below.</div>
+	</div>
+</div>
+
+<div ng-if="!loading">
+
+<div class="ds-float-right ds-margin-0_5">
+	<span class="gsi-deepblue-hover ds-icon-size-default ds-icon-download-m ds-margin-0_5" title="Download CSV file" 
+	 	ng-click="download('csv')"></span>
+	<span class="gsi-deepblue-hover ds-icon-size-default ds-icon-help-m ds-margin-0_5" title="Help, Tips and Tricks" 
+	 	ng-click="refreshLastUpdtShowOvrl()"></span>
+</div>
+
+<div class="ds-padding-top-2_5 ds-padding-bottom-1 ds-align-text-center">
+	<div class="ds-col-xs-12 ds-col-sm-10 ds-col-md-9 ds-col-lg-8 ds-col-xl-7 ds-panel ds-panel-rounded ds-panel-raised ds-padding-1">
+		<div class="ds-text-align-center">Here You Can Submit A New Approval Request, Monitor The Status of Submitted Claims</div>
+		<div class="ds-text-align-center ds-margin-bottom-0_5">Or Take Necessary Actions That Are Pending Your Input.</div>
+		<div class="ds-align-text-center ds-padding-1">
+			<button class="gsi-btn-pri gsi-btn-blue ds-panel ds-panel-rounded ds-panel-floating" ng-click="overlayShow('#overlay-exception-forms')">
+				<div class="ds-align-text-center">SUBMIT NEW REQUEST</div>
+			</button> 
+		</div>	
+	</div>
+</div> 
+
+ <div ng-show="eeList && fixedHeader && !blank" class="ds-table-container gsi-table-simple">
+	<table id="fixAbleHeader" frozen name="table" class="ds-table gsi-text-table frozen-header">
+		<thead>
+			<tr class="ds-bg-neutral-1">
+				<th frozen name="conDetailButton"></th>
+			 	<th ng-repeat="field in fields.list" class="gsi-animate-normal ds-label ds-text-smaller ds-font-weight-bold" ng-class="{'gsi-highlight-blue': field.highlight}" 
+			 		frozen name="{{ field.value }}" ng-show="field.visible" title="{{ field.description }}">
+				 		<span>{{ field.name }}</span>
+			 	</th>
+			</tr>
+		</thead>
+	</table>
+</div> 
+
+
+<div class="ds-padding-bottom-1_5 ds-padding-top-1_5">
+
+<div>
+	<div class="ds-align-text-center ds-padding-top-1">
+		<p class="ds-text-small ds-padding-bottom-0_5">
+			<button ng-show="fieldSectionInactive" class="ds-col-xs-12 ds-col-md-5 ds-col-lg-4 gsi-btn-sec gsi-btn-black-blue gsi-btn-small" 
+				title="Click here to expand/collapse the field selection section&#013;On this section you will be able to include or remove fields from your view"
+				ng-click="fieldSectionUpdate()">Show Field Selection Section</button>
+			<button ng-show="!fieldSectionInactive" class="ds-col-xs-12 ds-col-md-5 ds-col-lg-4 gsi-btn-sec gsi-btn-black-blue gsi-btn-small" 
+				title="Click here to expand/collapse the field selection section&#013;On this section you will be able to include or remove fields from your view"
+				ng-click="fieldSectionUpdate()">Hide Field Selection Section</button>
+		</p>
+	</div>
+
+	<div ng-show="!fieldSectionInactive" class="gsi-animate-normal">
+		<div class="ds-col-xs-12 ds-col-sm-6 ds-col-md-4 ds-col-lg-2 ds-text-small" ng-repeat="rows in fields.fieldList">
+			<div ng-repeat-start="field in rows | showFields:searchText" class="gsi-field-selection-padding gsi-animate-normal" ng-class="{'gsi-highlight-blue': field.highlight}">
+				<div title="{{ field.description }}">
+					<input class="gsi-styled-checkbox" id="checkbox-id-{{ field.value }}" type="checkbox"
+							ng-model="field.visible" ng-click="saveSelectedFieldsLocally(field.value, field.visible)">
+					<label for="checkbox-id-{{ field.value }}" class="gsi-field-label">{{ field.name }}</label>
+				</div>
+			</div>
+			<div ng-repeat-end></div>
+		</div>
+	</div>
+	
+	<div ng-show="fieldSectionInactive" class="ds-text-small ds-align-text-center gsi-animate-fast">Open this section and mark the check boxes with the information that you want to see on the {{ useTableView ? 'table' : 'cards' }} below</div>
+	
+</div>
+
+
+<!-- FILTER BUTTONS -->
+	
+<div class="ds-align-text-center ds-padding-top-1" >
+	<p class="ds-text-small ds-padding-bottom-0_5">
+		<button ng-show="activeFilterFlag && filterInputIsActive" 
+			class="ds-col-xs-12 ds-col-md-3 ds-col-lg-2 gsi-btn-sec gsi-btn-black-blue gsi-btn-small" 
+			ng-click="activeFiltersUpdate()" href="">Hide Active Filters</button>
+			
+		<button ng-show="!activeFilterFlag" 
+			class="ds-col-xs-12 ds-col-md-3 ds-col-lg-2 gsi-btn-sec gsi-btn-black-blue gsi-btn-small ds-col-lg-2 ds-margin-top-xs-0_5 ds-margin-top-md-0" 
+			ng-click="activeFiltersUpdate()" href="">Show Active Filters</button>
+			
+		<button ng-show="inactiveFilterFlag && activeFilterFlag" 
+			class="ds-col-xs-12 ds-col-md-3 ds-col-lg-2 gsi-btn-sec gsi-btn-black-blue gsi-btn-small ds-col-lg-2 ds-margin-top-xs-0_5 ds-margin-top-md-0" 
+			ng-click="inactiveFiltersUpdate()" href="">Hide Inactive Filters</button>
+			
+		<button ng-show="inactiveFilterFlag && !activeFilterFlag" 
+			class="ds-col-xs-12 ds-col-md-3 ds-col-lg-2 gsi-btn-sec gsi-btn-black-blue gsi-btn-small ds-col-lg-2 ds-margin-top-xs-0_5 ds-margin-top-md-0" 
+			ng-click="inactiveFiltersUpdate()" href="">Hide All Filters</button>
+			
+		<button ng-show="!inactiveFilterFlag" 
+			class="ds-col-xs-12 ds-col-md-3 ds-col-lg-2 gsi-btn-sec gsi-btn-black-blue gsi-btn-small ds-col-lg-2 ds-margin-top-xs-0_5 ds-margin-top-md-0" 
+			ng-click="inactiveFiltersUpdate()" href="">Show All Filters</button>
+	</p>
+
+	<div ng-show="inactiveFilterFlag" class="gsi-animate-normal">
+		<div ng-repeat="rows in fields.filterList" class="ds-col-xs-12 ds-col-sm-6 ds-col-md-2 gsi-fixed-width-md">
+			<div ng-repeat="filter in rows" class="ds-input-container gsi-animate-normal" ng-class="{'gsi-highlight-blue': filter.highlight}">
+				<label for="filter-id-{{ filter.name }}" class="ds-input-label ds-float-left ds-text-smaller"
+					ng-class="{ 'ds-font-weight-bold' : filters[filter.value] }">{{ filter.name }}</label>
+				<span class="ds-icon-close ds-float-right ds-text-smaller ds-clickable gsi-red-hover" ng-click="removeThisFilter(filter.value, 50)"
+	 				title="Click here to remove this filter"></span>
+				<input type="text" class="ds-input ds-text-small " id="filter-id-{{ filter.name }}" 
+					ng-model="filters[filter.value]" ng-change="filterAfterDelay(2000)">
+			</div>
+		</div>
+	</div>
+	
+	<div ng-hide="!activeFilterFlag" ng-if="!inactiveFilterFlag && filterInputIsActive" class="gsi-animate-normal">
+		<div ng-repeat="(key, value) in filters" class="ds-col-xs-12 ds-col-sm-6 ds-col-md-2 gsi-fixed-width-md">
+			<div class="ds-input-container gsi-animate-normal" ng-class="{'gsi-highlight-blue': fields.map[key].highlight}">
+				<label for="filter-id-{{ fields.map[key].name }}" class="ds-input-label ds-float-left ds-text-smaller">{{ fields.map[key].name }}</label>
+				<span class="ds-icon-close ds-float-right ds-text-smaller ds-clickable gsi-red-hover" ng-click="removeThisFilter(key, 50)"
+	 				title="Click here to remove this filter"></span>
+				<input type="text" class="ds-input ds-text-small" id="filter-id-{{ fields.map[key].name }}" 
+					ng-model="filters[key]" ng-change="filterAfterDelay(2000)">
+			</div>
+		</div>
+	</div>
+	
+	
+	<div ng-show="!activeFilterFlag && !inactiveFilterFlag || !filterInputIsActive && !inactiveFilterFlag && activeFilterFlag" class="ds-text-small gsi-animate-normal">
+	To start filtering, click on the desired field with <span class="ds-text-small ds-text-kbd">Ctrl</span> (automatic filter) or <span class="ds-text-small ds-text-kbd">Alt</span> (empty filter) pressed.
+	<br>You can also open this section to have all input boxes displayed at all times.</div>
+
+</div>
+
+</div>
+
+<div ng-show="eeList && fixedHeader && !blank" class="ds-table-container gsi-table-simple">
+	<table id="fixAbleHeader" frozen name="table" class="ds-table gsi-text-table frozen-header">
+		<thead>
+			<tr class="ds-bg-neutral-1">
+				<th frozen name="conDetailButton"></th>
+			 	<th ng-repeat="awt in awts.list" class="gsi-animate-normal ds-label ds-text-smaller ds-font-weight-bold" ng-class="{'gsi-highlight-blue': field.highlight}" 
+			 		frozen name="{{ field.value }}" ng-show="field.visible" title="{{ field.requestType }}">
+				 		<span>{{ field.name }}</span>
+			 	</th>
+			</tr>
+		</thead>
+	</table>
+</div> 
+
+<div class="ds-col-12 ds-padding-1 gsi-flex gsi-flex--wrap">
+
+	<div class="ds-col-auto-force gsi-flex--self-center">
+		<record-navigation></record-navigation>
+	</div>
+		
+	<div class="ds-col-auto gsi-flex">
+		<div class="ds-col-auto-force gsi-flex--self-center gsi-deepblue-hover ds-padding-left-1" title="Click here to refresh the result set">
+			 <span class="ds-icon-refresh-m-l ds-icon-size-small gsi-icon-height" ng-click="fetchAndLoad()"></span>
+		</div>
+		
+		<div class="ds-col-auto-force gsi-flex--self-center ds-clickable gsi-red-hover ds-padding-left-1" ng-if="filtersActive || filterInputIsActive" title="Click here to remove all filters">
+			 <span class="ds-icon-close-m-l ds-icon-size-small gsi-icon-height" ng-click="removeFilters()"></span>
+		</div>
+	</div>
+		
+	<div class="ds-col-xs-12 ds-col-md-3 ds-col-lg-2 ds-padding-left-1 gsi-flex">
+		<input class="ds-input ds-text-small" type="text" 
+				ng-model="searchText" placeholder="Search for fields">		
+	</div>
+	
+</div>
+		
+<div class="ds-align-text-center">
+	<div ng-show="loading">
+		<div class="ds-loader-container ds-padding-top-1">
+			<div class="ds-loader"></div>
+		</div>
+	</div>
+	<div ng-show="loadingError">
+		<div class="ds-text-contextual-red-3 ds-padding-top-1">
+			<span class="ds-icon-alert-m-l ds-icon-size-default gsi-align-sub"></span> An error has occurred while loading the data
+		</div>
+	</div>
+	<div ng-show="blank">
+		<span class="ds-icon-sentiment-wow-m-l ds-icon-size-default gsi-align-sub"></span>
+		There doesn't seem to be anything here, try refreshing the page! 
+	</div>
+</div>
+	
+<!-- <div class="ds-row ds-file-upload-container ds-mar-b-2">
+	<div class="ds-col-6">
+		<input type="file" class="ds-file-upload" name="file" id="multiple-file-upload" multiple="multiple" fileread="fileselection.files">
+			<label for="multiple-file-upload" class="ds-button ds-secondary">Choose a file</label>
+	</div>
+	
+	<div ng-if="fileselection.files.length > 0 && fileselection.files" class="ds-col-xs-12" ng-repeat="file in fileselection.files">
+		<div ng-if="!file.removed" class="ds-file-name"> {{ file.name }} <span class="ds-heading-4 ds-icon-close-circle" ng-click="removeFile($index)"></span></div>
+	</div>
+	
+	<div class="ds-col-12 ds-margin-top-2 ds-align-text-center">
+		<button class="ds-col-3 ds-panel ds-panel-rounded ds-panel-floating ibm-btn-sec ibm-btn-blue-50 ds-label ds-text-small ds-padding-1"
+			ng-click="add()">Add File</button>
+	</div>	
+</div> -->	
+			
+
+	
+<!-- FILTER BUTTONS END -->
+
+<!-- OVERLAY-Submit New Request-OVERLAY -->
+
+<div class="ds-overlay-container">
+	<div class="ds-overlay-focus" id="overlay-exception-forms" ng-click="overlayHide()">
+		<div class="ds-overlay-box gsi-overlay-column" ng-click="$event.stopPropagation()">
+			<div class="gsi-overlay-heading">
+				<button class="ds-col-auto ds-button ds-flat" ng-click="overlayHide()">
+					<span id="overlay-exception-forms-open"></span><span class="ds-icon-x"></span>
+				</button>
+			</div>
+			<div class="gsi-content ds-margin-top-2">
+			
+				<div class="ds-col-10 ds-offset-1 ds-padding-left-2 ds-padding-right-2">
+                    <div class="ds-align-text-center"><p style="font-size:30px">Generate Approval Request Below</p></div>  
+                    <div class="ds-padding-top-1"></div>
+                  
+             		<div class="ds-align-text-center"><p style="font-size:25px">Approval Request Details</p></div>
+<div>{{ selections }}</div>                
+   
+<!-- TESTING -->                 
+<!--  			<div class="ds-row ds-file-upload-container ds-mar-b-2">
+			 	<div class="ds-col-6">
+					<input type="file" class="ds-file-upload" name="file" id="multiple-file-upload" multiple="multiple" fileread="selections.files">
+						<label for="multiple-file-upload" class="ds-button ds-secondary">Choose a file</label>
+				</div>
+						<div ng-if="selections.files.length > 0 && selections.files" class="ds-col-xs-12" ng-repeat="file in selections.files">
+					       	<div ng-if="!file.removed" class="ds-file-name"> {{ file.name }} <span class="ds-heading-4 ds-icon-close-circle" ng-click="removeFile($index)"></span></div>
+					    </div>
+			</div> -->
+<!-- TESTING -->				   
+					
+					     
+					<div class="ds-row ds-padding-0">
+						<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+							<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Approval Category/Type:
+							</span>
+							<select class="ds-input ds-select" ng-model="selections.apprType" ng-options="except.txt as except.txt for except in options.apprType"></select>
+						</div>
+						
+						<div class="ds-col-6 ds-padding-right-0 ds-padding-left-0_5">
+							<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Management Endorsement: 
+							</span>
+							<select class="ds-input ds-select" ng-model="selections.managerEndorsement" ng-options="except.txt as except.txt for except in options.managerEndorsement"></select>
+						</div>
+					</div>
+
+<!-- 					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Approval Type: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.apprType" ng-options="except.txt as except.txt for except in options.approvalType"></select>
+					</div> -->
+
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Affected Plan Year: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.planYearAffected" ng-options="except.txt as except.txt for except in options.planYearAffected"></select>
+					</div>
+
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Affected Duration: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.durationAffected" ng-options="except.txt as except.txt for except in options.durationAffected"></select>
+					</div>
+
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Planned Implementation Date: 
+						</span>
+					    <input type="date" class="ds-input" id="input-date" ng-model="selections.implementationDate" required placeholder="YYYY/MM/DD">
+					</div> 
+
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Brief Description: 
+						</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.briefDescr" placeholder="Briefly Describe Details of Exception Request....."></textarea>
+					</div>
+
+
+					<div class="ds-padding-top-1 ds-row ds-file-upload-container ds-mar-b-2 ">
+						<div class="ds-col-6">
+							<input type="file" class="ds-file-upload" name="file" id="multiple-file-upload" multiple="multiple" fileread="selections.files">
+								<label for="multiple-file-upload" class="ds-button ds-secondary">Choose a file</label>
+						</div>
+						
+						<div ng-if="selections.files.length > 0 && selections.files" class="ds-col-xs-12" ng-repeat="file in selections.files">
+							<div ng-if="!file.removed" class="ds-file-name"> {{ file.name }} <span class="ds-heading-4 ds-icon-close-circle" ng-click="removeFile($index)"></span></div>
+						</div>
+						
+					</div>
+
+					<div class="ds-align-text-center ds-padding-top-1_5">
+						<p style="font-size:25px">Where Does It Apply?</p>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Geography: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.geo" ng-options="except.txt as except.txt for except in options.geo"></select>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Market: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.market" ng-options="except.txt as except.txt for except in options.market"></select>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Country/Country Code: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.country" ng-options="except.txt as except.txt for except in options.country"></select>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Business Unit: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.busUnit" ng-options="except.txt as except.txt for except in options.busUnit"></select>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>No. of Affected Employees: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.noAffectedEmpl" ng-options="except.txt as except.txt for except in options.noAffectedEmpl"></select>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Name of Affected Employees: 
+						</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.nameAffectedEmployee" placeholder="Disregard if more than 10 employees"></textarea>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Sales Role(s): 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.salesRoles" ng-options="except.txt as except.txt for except in options.salesRoles"></select>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Sales Role(s) Affected by Request: 
+						</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.salesRolesAffected" placeholder=></textarea>
+					</div>
+										
+					<div ng-if="selections.apprType == '04 Payment Deviation'">					
+					
+					<div class="ds-row ds-padding-1">
+						<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+							<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Plan Start Date: 
+							</span>
+					    		<input type="date" class="ds-input" id="input-date" ng-model="selections.planStart" required placeholder="YYYY/MM/DD">
+					 </div>
+					    
+					    <div class="ds-col-6 ds-padding-right-0 ds-padding-left-0_5">
+					    	<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Plan End Date: 
+							</span>
+					    		<input type="date" class="ds-input" id="input-date" ng-model="selections.planEnd" required placeholder="YYYY/MM/DD">
+						</div>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Commission Month: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.commnMth" ng-options="except.txt as except.txt for except in options.commnMth"></select>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+					 	<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+							<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Will Monetary Claim Be Submitted To Post Payroll Activity to the EE Commission Statement: 
+							</span>
+							<select class="ds-input ds-select" ng-model="selections.submitPayroll" ng-options="except.txt as except.txt for except in options.submitPayroll"></select>
+						</div>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Actions Needed to Correct the Issue at the Root Cause: 
+						</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.correctRootcause" placeholder="Briefly Describe Actions Needed To Correct the Issue at the Root Cause"></textarea>
+					</div>
+
+					<div class="ds-row ds-padding-1">
+						<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+							<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Time Frame of Overpayments(Begin): 
+							</span>
+					    		<input type="date" class="ds-input" id="input-date" ng-model="selections.overpaymentBegin" required placeholder="YYYY/MM/DD">
+					    </div>
+					    
+					    <div class="ds-col-6 ds-padding-right-0 ds-padding-left-0_5">
+					    	<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Time Frame of Overpayments(End): 
+							</span>
+					    		<input type="date" class="ds-input" id="input-date" ng-model="selections.overpaymentEnd" required placeholder="YYYY/MM/DD">
+						</div>
+					</div>
+					
+				<div class="ds-row ds-padding-top-1">
+					 	<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+							<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Is a Hardcopy Check to be Mailed to the Employee's Home Address Required?
+							</span>
+							<select class="ds-input ds-select" ng-model="selections.emplMail" ng-options="except.txt as except.txt for except in options.emplMail"></select>
+						</div>
+				
+					 	<div class="ds-col-6 ds-padding-right-0 ds-padding-left-0_5">
+							<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Will Overnight Mail Handling Be Required?
+							</span>
+							<select class="ds-input ds-select" ng-model="selections.overnightMail" ng-options="except.txt as except.txt for except in options.overnightMail"></select>
+						</div>
+				</div>
+								
+								
+				<div class="ds-row ds-padding-top-1">
+					<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Payment Amount: 
+						</span>
+					    <input id="input-text" class="ds-input" ng-model="selections.pmtAmount" placeholder=123.00></input>
+					</div>
+				
+				 	<div class="ds-col-6 ds-padding-right-0 ds-padding-left-0_5">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Payment Currency:
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.pmtCurr" ng-options="except.txt as except.txt for except in options.pmtCurr"></select>
+					</div>
+				</div>				
+
+					<div class="ds-row ds-padding-top-1">
+						<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+							<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Sum of All Debit Balances: 
+							</span>
+					    <input id="input-text" class="ds-input" ng-model="selections.sumDebitBalance" placeholder=123.00></input>
+						</div>
+				 	</div>
+				 	
+				 	<div class="ds-row ds-padding-top-1">
+				 		<div class="ds-col-6 ds-padding-right-0 ds-padding-left-0_5">
+					    	<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Date Submitted To Payroll: 
+							</span>
+					    		<input type="date" class="ds-input" id="input-date" ng-model="selections.submittedPR" required placeholder="YYYY/MM/DD">
+						</div>		
+								 	
+				 		<div class="ds-col-6 ds-padding-right-0 ds-padding-left-0_5">
+					    	<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Date Confirmed By Payroll: 
+							</span>
+					    		<input type="date" class="ds-input" id="input-date" ng-model="selections.srRequest" required placeholder="YYYY/MM/DD">
+						</div>
+					</div>
+					
+					<div class="ds-align-text-center ds-padding-top-1"><p style="font-size:25px">What Is The Request?</p></div>
+					
+					<div class="ds-row ds-padding-top-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Payment Type: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.pmtType" ng-options="except.txt as except.txt for except in options.pmtType"></select>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Payment Reason: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.pmtReason" ng-options="except.txt as except.txt for except in options.pmtReason"></select>
+					</div>
+					
+				<div class="ds-row ds-padding-top-1">
+					 	<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+							<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Payment Category:
+							</span>
+							<select class="ds-input ds-select" ng-model="selections.pmtCategory" ng-options="except.txt as except.txt for except in options.pmtCategory"></select>
+						</div>
+				
+					 	<div class="ds-col-6 ds-padding-right-0 ds-padding-left-0_5">
+							<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Root Cause:
+							</span>
+							<select class="ds-input ds-select" ng-model="selections.rootCause" ng-options="except.txt as except.txt for except in options.rootCause"></select>
+						</div>
+				</div>
+				
+				<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>When was the Issue Identified? 
+						</span>
+					    <input type="date" class="ds-input" id="input-date" ng-model="selections.issueIdentified" required placeholder="YYYY/MM/DD">
+				</div> 
+
+					</div>
+
+					<div ng-if="selections.apprType == '03 Territory/Quota Changes'">
+					
+						<div class="ds-align-text-center"><p style="font-size:25px">QUOTA DETAILS</p></div>
+						
+						<div class="ds-align-text-center"><p style="font-size:25px">Why Is This Request Required?</p></div>
+						
+					<div class="ds-row ds-padding-top-1">
+						<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+							<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>Current Quota: 
+							</span>
+					    <input id="input-text" class="ds-input" ng-model="selections.curQta" placeholder=1234.00></input>
+						</div>
+						
+						<div class="ds-col-6 ds-padding-right-0 ds-padding-left-0_5">
+							<span class="ds-label ds-margin-0 ds-float-left">
+								<span class="ds-text-contextual-red-3 ds-icon-new"></span>New Quota: 
+							</span>
+					    <input id="input-text" class="ds-input" ng-model="selections.newQta" placeholder=1234.00></input>
+						</div>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Business Values and Benefits: 
+						</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.busnValues" placeholder=></textarea>
+					</div>
+						
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Will Full Assignment of Quota Be Maintained? 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.fullAssn" ng-options="except.txt as except.txt for except in options.fullAssn"></select>
+					</div>
+					
+					</div>
+					
+					<div ng-if="selections.apprType == '04 Payment Deviation'">
+					
+					<div class="ds-align-text-center ds-padding-top-1"><p style="font-size:25px">Incremental Incentives</p></div>					
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Incremental Incentives High Level Categories: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.incrCate" ng-options="except.txt as except.txt for except in options.incrCate"></select>
+					</div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Incremental Incentives Programs: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.incrPgr" ng-options="except.txt as except.txt for except in options.incrPgr"></select>
+					</div>
+					 
+					<div class="ds-align-text-center ds-padding-top-1"><p style="font-size:25px">Incentive Advances</p></div>
+					
+					<div class="ds-row ds-padding-top-1">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Number of Months Required: 
+						</span>
+						<select class="ds-input ds-select" ng-model="selections.reqMth" ng-options="except.txt as except.txt for except in options.reqMth"></select>
+					</div>
+					
+				<div class="ds-row ds-padding-top-1">
+					<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Amount of Advance(% of Target Incentive): 
+						</span>
+					    <input id="input-text" class="ds-input" ng-model="selections.amtAdv" placeholder=123.00></input>
+					</div>
+				
+					 	<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Calculation Methodology for the Advance Payment Being Requested: 
+						</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.calcMeth" placeholder=></textarea>
+					</div>
+				</div>
+				
+				</div>
+								
+				<div ng-if="selections.apprType == '05 Measurement Deviation'">			
+										
+				<div class="ds-align-text-center ds-padding-top-1"><p style="font-size:25px">Measurement Details</p></div>
+					
+				<div class="ds-align-text-center ds-padding-top-1"><p style="font-size:25px">Data Owner and Information</p></div>
+					
+				<div class="ds-row ds-padding-top-1">
+					<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Manual Measurement Requested: 
+						</span>
+					    <input id="input-text" class="ds-input" ng-model="selections.compMeasReq" placeholder="123.00"></input>
+					</div>
+				
+					 	<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>What is the Source System? 
+						</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.srcSys" placeholder=></textarea>
+					</div>
+				</div>
+					
+				<div class="ds-row ds-padding-top-1">
+					<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Number of Employees Currently on the Measurements? 
+						</span>
+					    <input id="input-text" class="ds-input" ng-model="selections.emplMeas" placeholder="123"></input>
+					</div>
+				
+					<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Number of Additional Employees to be Added to the Measurement? 
+						</span>
+					    <input id="input-text" class="ds-input" ng-model="selections.addtEmplMeas" placeholder="123"></input>
+					</div>
+				</div>	
+				
+				<div class="ds-row ds-padding-top-1">
+					<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Who is responsible for providing the Manual Measurement Results to the Incentive Team? 
+						</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.respProvResults" placeholder=></textarea>
+					</div>
+				
+					 	<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Who is the Data Approver-Must be Finance Manager(Provide Name and email address)? 
+						</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.dataAppr" placeholder=></textarea>
+					</div>
+				</div>	
+				
+				<div class="ds-row ds-padding-top-1">
+					<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Briefly Detail Extraction Criteria for the Results: 
+						</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.extractCrit" placeholder=></textarea>
+					</div>
+				
+					 	<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Controls/Checks Performed on Data Prior To Submission 
+						</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.contrChecks" placeholder=></textarea>
+					</div>
+				</div>
+				
+				<div class="ds-row ds-padding-top-1">
+					<span class="ds-label ds-margin-0 ds-float-left">
+						<span class="ds-text-contextual-red-3 ds-icon-new"></span>What Is the Frequency of Providing Results? 
+					</span>
+						<select class="ds-input ds-select" ng-model="selections.freqResult" ng-options="except.txt as except.txt for except in options.freqResult"></select>
+				</div>
+				
+				<div class="ds-row ds-padding-top-1">
+					<span class="ds-label ds-margin-0 ds-float-left">
+						<span class="ds-text-contextual-red-3 ds-icon-new"></span>Is the Data Provided from an ASCA Certified System? 
+					</span>
+						<select class="ds-input ds-select" ng-model="selections.ascaCert" ng-options="except.txt as except.txt for except in options.ascaCert"></select>
+				</div>
+				
+				<div class="ds-row ds-padding-top-1">
+					<span class="ds-label ds-margin-0 ds-float-left">
+						<span class="ds-text-contextual-red-3 ds-icon-new"></span>Is the Incentive Team expected to perform any further checks on the data? 
+					</span>
+						<select class="ds-input ds-select" ng-model="selections.furthChecks" ng-options="except.txt as except.txt for except in options.furthChecks"></select>
+				</div>
+				
+				<div class="ds-row ds-padding-top-1">
+					<span class="ds-label ds-margin-0 ds-float-left">
+						<span class="ds-text-contextual-red-3 ds-icon-new"></span>What Workday will the data be provided? 
+					</span>
+						<select class="ds-input ds-select" ng-model="selections.wkDay" ng-options="except.txt as except.txt for except in options.wkDay"></select>
+				</div>
+				
+				
+		
+				<div class="ds-align-text-center ds-padding-top-1"><p style="font-size:25px">Implementation Requirements- How and When?</p></div>	
+				
+				<div class="ds-row ds-padding-top-1">
+					<span class="ds-label ds-margin-0 ds-float-left">
+						<span class="ds-text-contextual-red-3 ds-icon-new"></span>System Changes and/or Manual Resources Required: 
+					</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.reqChanges" placeholder=></textarea>
+				</div>
+					
+				<div class="ds-row ds-padding-top-1">
+					<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0_5">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Has the Resource Implementor Agreed To This?
+						</span>
+							<select class="ds-input ds-select" ng-model="selections.resImpl" ng-options="except.txt as except.txt for except in options.resImpl"></select>
+					</div>
+								
+					<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Approver Resource Implementor Name/Intranet Email 
+						</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.apprName" placeholder=></textarea>
+					</div>
+				</div>	
+				
+				<div class="ds-row ds-padding-top-1">
+					<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0_5">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Is the Payment Cycle Impacted?
+						</span>
+							<select class="ds-input ds-select" ng-model="selections.dataID" ng-options="except.txt as except.txt for except in options.dataID"></select>
+					</div>
+				
+					<div class="ds-col-6 ds-padding-right-0_5 ds-padding-left-0">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Describe and Quantify the Impact: 
+						</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.impact" placeholder=></textarea>
+					</div>
+				</div>	
+					
+				<div class="ds-align-text-center ds-padding-top-1"><p style="font-size:25px">Design Category</p></div>
+					
+			<div class="ds-row ds-padding-0">				
+					<div class="ds-col-6 ds-padding-right-0 ds-padding-left-0_5">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Achievement Provided from a Trusted Source?
+						</span>
+							<select class="ds-input ds-select" ng-model="selections.trustSrc" ng-options="except.txt as except.txt for except in options.trustSrc"></select>
+					</div>
+					
+					<div class="ds-col-6 ds-padding-right-0 ds-padding-left-0_5">
+						<span class="ds-label ds-margin-0 ds-float-left">
+							<span class="ds-text-contextual-red-3 ds-icon-new"></span>Has the Data Provider been Identified/Recognized?
+						</span>
+							<select class="ds-input ds-select" ng-model="selections.provDen" ng-options="except.txt as except.txt for except in options.provDen"></select>
+					</div>
+			</div>	
+							
+				<div class="ds-row ds-padding-top-1">
+					<span class="ds-label ds-margin-0 ds-float-left">
+						<span class="ds-text-contextual-red-3 ds-icon-new"></span>Is this measurement going to be available WW or local?  
+					</span>
+					    <textarea id="input-textarea" class="ds-input" ng-model="selections.wwLocal" placeholder="(If Local identify country, market, etc.)"></textarea>
+				</div>
+				
+			</div>									
+					<div class="ds-padding-top-1 ds-col-12 ds-offset-sm-4 ds-col-sm-4 ds-offset-md-5 ds-col-md-3 ds-offset-lg-5 ds-col-lg-2 ds-margin-bottom-1">
+					    <button ng-click="insertWorkflow()" class="ds-button ds-primary ds-no-expand ds-align-text-center ds-margin-bottom-0">Submit</button>
+					</div>
+					
+					<div class="ds-padding-top-1 ds-col-12 ds-col-sm-4 ds-col-md-3 ds-col-lg-2 ds-margin-bottom-1">
+					    <button class="ds-button ds-secondary ds-no-expand ds-align-text-center ds-margin-bottom-0" ng-click="clearForm()">Cancel</button>
+					</div>
+ 				</div> 
+			</div>
+		</div>          
+    </div>
+</div>
+
+	
+<div class="ds-overlay-container">
+	<div class="ds-overlay-focus" id="overlay-tips-tricks" ng-click="overlayHide()">
+		<div class="ds-overlay-box gsi-overlay-column" ng-click="$event.stopPropagation()">
+			<div class="gsi-overlay-heading">
+				<button class="ds-col-auto ds-button ds-flat" ng-click="overlayHide()">
+					<span id="overlay-tips-tricks-open"></span><span class="ds-icon-x"></span>
+				</button>
+			</div>
+			<div class="gsi-content ds-margin-top-2">
+				
+				<overlay-tips-tricks></overlay-tips-tricks>
+
+			</div>
+		</div>
+	</div>
+</div>
+                              
+<!-- OVERLAY-Submit New Request-OVERLAY END  -->     
+<!-- OVERLAY-Individual Activity Detail-OVERLAY -->
+<div class="ds-overlay-container">
+	<div class="ds-overlay-focus" id="request-detail" ng-click="overlayHide()">
+		<div class="ds-overlay-box gsi-overlay-strip" ng-click="$event.stopPropagation()">
+			<div class="gsi-overlay-heading ds-padding-bottom-2">
+				<!-- <button class="ds-col-auto-force ds-button ds-flat" ng-click="getRecordUrl()">
+					<span class="ds-icon-export gsi-icon-height"></span>
+				</button> -->
+<!-- 				<button class="ds-col-auto-force ds-button ds-flat" ng-click="overlayHide()">
+					<span id="activity-detail-open"></span><span class="ds-icon-x gsi-icon-height"></span>
+				</button> -->
+			</div>
+			<request-detail></request-detail>
+		</div>
+	</div>
+</div> 
+
+<!-- EXCEPTION TABLE BEGIN -->
+
+<div class="ds-table-container">
+    <table class="ds-table ds-hover">
+        <thead>
+            <tr>
+            	<th>Workflow Preview</th>
+            	<th ng-show="fields.map.log_unique_id.visible">Log Number</th>
+                <th ng-show="fields.map.submitter_name.visible">Submitter Name</th>
+                <th ng-show="fields.map.submitter_cnum.visible">Submitter Serial Number</th>
+                <th ng-show="fields.map.approval_type.visible">Approval Type</th>
+                <th ng-show="fields.map.plan_year.visible">Plan Year</th>
+                <th ng-show="fields.map.duration_affected.visible">Duration</th>
+                <th ng-show="fields.map.description.visible">Description</th>
+                <th title="{{ fields.map.geo.description }}" ng-show="fields.map.geo.visible">Geo</th>
+                <th ng-show="fields.map.market.visible">Market</th>
+                <th ng-show="fields.map.busn_unit.visible">Business Unit</th>
+                <th ng-show="fields.map.approver1.visible">Approver 1</th>
+                <th ng-show="fields.map.approver1.visible">Approver 2</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="awt in afterPagination | filter: requestType | orderBy: 'logNbr'" >
+            	<td class="ds-padding-0">
+					<button class="ds-col-auto-force ds-button ds-flat gsi-view-button ds-margin-0" ng-click="fetchRecordOverlay(awt.logNbr)">
+						<span class="ds-icon-file-image"></span>
+					</button>
+				</td> 
+                <td ng-show="fields.map.log_unique_id.visible">{{awt.logNbr}}</td>
+			    <td ng-show="fields.map.submitter_name.visible">{{awt.submitterName}}</td>
+			    <td ng-show="fields.map.submitter_cnum.visible">{{awt.submitterCnum}}</td>
+                <td ng-show="fields.map.approval_type.visible">{{awt.apprType}}</td>
+                <td ng-show="fields.map.plan_year.visible">{{awt.planYearAffected}}</td>
+                <td ng-show="fields.map.duration_affected.visible">{{awt.durationAffected}}</td>
+                <td ng-show="fields.map.description.visible">{{awt.briefDescr}}</td>
+                <td ng-show="fields.map.geo.visible">{{awt.geo}}</td>
+                <td ng-show="fields.map.market.visible">{{awt.market}}</td>
+                <td ng-show="fields.map.busn_unit.visible">{{awt.busUnit}}</td>
+                <td ng-show="fields.map.approver1.visible">{{awt.approver1}}</td>
+                <td ng-show="fields.map.approver2.visible">{{awt.approver2}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+</div>
+</div>
+<!-- EXCEPTION TABLE END -->

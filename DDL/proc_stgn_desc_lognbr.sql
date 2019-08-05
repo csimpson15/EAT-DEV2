@@ -1,0 +1,8 @@
+CREATE OR REPLACE PROCEDURE STGN.DESC_LOGNBR(OUT lognbr INT)
+
+	WITH lastrow AS SELECT (lastrow FROM op.workflow ORDER BY lastrow DESC FETCH FIRST ROW)
+BEGIN
+	SET lognbr = lastrow
+END
+
+	

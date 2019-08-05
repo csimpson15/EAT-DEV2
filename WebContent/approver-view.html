@@ -1,0 +1,161 @@
+<div ng-controller="MainCtrl">
+
+<div class="gsi-band-bg ds-padding-1">
+	<div class="ds-col-12 ds-padding-left-2 ds-text-neutral-1">
+		<div class="ds-heading-3 ds-margin-bottom-0">Exceptions Approvals Tool</div>
+		<div class="ds-heading-5 ds-margin-bottom-0">Welcome to the Exceptions Approvals Tool. Create and view exceptions below.</div>
+	</div>
+</div>
+<br><br>
+
+<!-- OVERLAY-Individual Activity Detail-OVERLAY -->
+<div class="ds-overlay-container">
+	<div class="ds-overlay-focus" id="activity-detail" ng-click="overlayHide()">
+		<div class="ds-overlay-box gsi-overlay-strip" ng-click="$event.stopPropagation()">
+			<div class="gsi-overlay-heading ds-padding-bottom-2">
+				<!-- <button class="ds-col-auto-force ds-button ds-flat" ng-click="getRecordUrl()">
+					<span class="ds-icon-export gsi-icon-height"></span>
+				</button> -->
+				<button class="ds-col-auto-force ds-button ds-flat" ng-click="overlayHide()">
+					<span id="activity-detail-open"></span><span class="ds-icon-x gsi-icon-height"></span>
+				</button>
+			</div>
+			<activity-detail></activity-detail>
+		</div>
+	</div>
+</div>
+	
+<div class="ds-overlay-container">
+	<div class="ds-overlay-focus" id="overlay-tips-tricks" ng-click="overlayHide()">
+		<div class="ds-overlay-box gsi-overlay-column" ng-click="$event.stopPropagation()">
+			<div class="gsi-overlay-heading">
+				<button class="ds-col-auto ds-button ds-flat" ng-click="overlayHide()">
+					<span id="overlay-tips-tricks-open"></span><span class="ds-icon-x"></span>
+				</button>
+			</div>
+			<div class="gsi-content ds-margin-top-2">
+				
+				<overlay-tips-tricks></overlay-tips-tricks>
+
+			</div>
+		</div>
+	</div>
+</div>
+                              
+<!-- OVERLAY-Submit New Request-OVERLAY END  --> 
+
+<!-- Loading Table & Error Messages -->
+<div class="ds-align-text-center">
+	<div ng-show="loading">
+		<div class="ds-loader-container ds-padding-top-1">
+			<div class="ds-loader"></div>
+		</div>
+	</div>
+	<div ng-show="loadingError">
+		<div class="ds-text-contextual-red-3 ds-padding-top-1">
+			<span class="ds-icon-top ds-icon-size-default gsi-align-sub"></span> An error has occurred while loading the data
+		</div>
+	</div>
+	<div ng-show="pending">
+		<span class="ds-icon-comment ds-icon-size-default gsi-align-sub"></span>
+		There are no pending activities. Please check again later.
+	</div>
+</div>
+
+<!-- ACTIVITIES TABLE BEGIN -->
+<div ng-show="!pending" class="ds-table-container">
+    <table id="dataTable" class="ds-table ds-hover">
+        <thead class="ds-label">
+            <tr>
+            	<th freeze name="detailButton"></th>
+            	<th>Log Number</th>
+               	<th>Targeted By Date</th>
+               	<th>Submitted By</th>
+               	<th>{{awt.geo}}</th>
+               	<th>Approval Status</th>
+               	<th>Action</th>               
+             </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="activity in pendingActivities | filter: activityId | orderBy: 'targetedByDate'" >            
+            	<td class="ds-padding-0">
+					<button class="ds-col-auto-force ds-button ds-flat gsi-view-button ds-margin-0 ds-icon-cloud-upload" ng-click="fetchActivityOverlay(activity.activityId)">						
+					</button>
+				</td>
+				<td>
+					<div id={{$index}} class="ds-accordion-container ds-mar-t-0 ds-mar-b-0" aria-labelledby="Column width accordion example">
+					    <div class="ds-row ds-accordion-item" aria-controls="ds-accordion-slidedown" aria-expanded="false" role="accordion item">
+					        <div ng-if="activity.deploymentCals1.length" class="ds-accordion-title ds-text-small" ng-click="collapse($index)">{{activity.activityName}}</div>
+					        <div ng-if="!activity.deploymentCals1.length" class="ds-text-small" ng-click="collapse($index)">{{activity.activityName}}</div>
+					        <div class="ds-accordion-slidedown" aria-hidden="true" role="region">
+					            <ul class="ds-mar-b-0" ng-repeat="childActivity in activity.deploymentCals1">
+	             					<li>{{childActivity.activityName}}</li>
+	        					</ul>
+					        </div>
+					    </div>
+					</div>
+				</td>
+                <td>{{activity.targetedByDate | date: 'yyyy-MM-dd'}}</td>
+                <td> {{activity.activitySubmittedBy}} </td>
+                <td> {{activity.approvalStatus}} </td>
+                <td>
+                	<button type="button" ng-click="approveActivityConfirm(activity)"
+						class="ds-col-xs-12 ds-col-md-3 ds-margin-top-xs-0_5 ds-margin-top-lg-0 gsi-align-sub ibm-btn-pri ibm-btn-small ibm-btn-teal-50 gsi-animate-unset">Approve</button>
+					&nbsp; &nbsp; &nbsp; &nbsp;
+					<button type="button" ng-click="rejectActivityConfirm(activity)"
+						class="ds-col-xs-12 ds-col-md-3 ds-margin-top-xs-0_5 ds-margin-top-lg-0 gsi-align-sub ibm-btn-pri ibm-btn-small ibm-btn-orange-50 gsi-animate-unset">Reject</button>
+                </td>                                   
+            </tr>
+        </tbody>
+    </table>
+</div>
+<!-- ACTIVITIES TABLE END -->
+
+<!-- Cofirmation Overlay -->
+<div class="ds-overlay-container">
+	<div class="ds-overlay-focus" id="overlay-approve-confirm" ng-click="overlayHide()">
+		<div class="ds-overlay-box gsi-overlay-strip" ng-click="$event.stopPropagation()">
+			<div class="gsi-overlay-heading">
+				<button class="ds-col-auto ds-button ds-flat" ng-click="overlayHide()">
+					<span id="overlay-approve-confirm-open"></span><span class="ds-icon-x"></span>
+				</button>
+			</div>
+			<div class="gsi-content ds-margin-top-2 ds-align-text-center ds-padding-bottom-2">
+				
+				<div class="ds-col-12 ds-heading-3 ds-padding-0_5"><strong>Attention:</strong></div>
+				<div class="ds-col-12 ds-heading-5">You are about to approve this activity - <strong>{{pendingActivityAllDetails.activityName}}</strong>. Once approved, it will be visible to all users and added in the Calendar.</div>
+				<div class="ds-col-12 ds-heading-5">Do you confirm?</div>
+				
+				<div class="ds-col-12 ds-padding-top-1">			
+					<button ng-click="updateApprovalStatus('APPROVED')" class="ds-col-2 ibm-btn-pri ibm-btn-blue-50">Continue</button>
+		    		<button ng-click="overlayHide()"	
+		    			class="ds-col-2 ds-margin-top-xs-0_5 ds-margin-top-md-0 ibm-btn-sec ibm-btn-red-50">Cancel</button>
+	    		</div>			
+			</div>
+		</div>
+	</div>
+	
+	<div class="ds-overlay-focus" id="overlay-reject-confirm" ng-click="overlayHide()">
+		<div class="ds-overlay-box gsi-overlay-strip" ng-click="$event.stopPropagation()">
+			<div class="gsi-overlay-heading">
+				<button class="ds-col-auto ds-button ds-flat" ng-click="overlayHide()">
+					<span id="overlay-reject-confirm-open"></span><span class="ds-icon-x"></span>
+				</button>
+			</div>
+			<div class="gsi-content ds-margin-top-2 ds-align-text-center ds-padding-bottom-2">
+				
+				<div class="ds-col-12 ds-heading-3 ds-padding-0_5"><strong>Attention:</strong></div>
+				<div class="ds-col-12 ds-heading-5">You are about to reject this activity - <strong>{{pendingActivityAllDetails.activityName}}</strong>.</div>
+				<div class="ds-col-12 ds-heading-5">Do you confirm?</div>
+				
+				<div class="ds-col-12 ds-padding-top-1">			
+					<button ng-click="updateApprovalStatus('REJECTED')" class="ds-col-2 ibm-btn-pri ibm-btn-blue-50">Continue</button>
+		    		<button ng-click="overlayHide()"	
+		    			class="ds-col-2 ds-margin-top-xs-0_5 ds-margin-top-md-0 ibm-btn-sec ibm-btn-red-50">Cancel</button>
+	    		</div>			
+			</div>
+		</div>
+	</div>
+</div>
+		
+</div>
